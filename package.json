@@ -8,6 +8,6 @@
     "start": "nodemon ./build/index.js"
   },
   "dependencies": {
-    "discord.js": "^14.13.0"
+    "discord.js": "^14.12.1"
   }
 }
