@@ -1,0 +1,13 @@
+{
+  "devDependencies": {
+    "eslint": "^8.50.0",
+    "nodemon": "^3.0.1",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "start": "nodemon ./build/index.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.13.0"
+  }
+}
