@@ -1,10 +1,9 @@
 import { Client, Events, GatewayIntentBits, GuildMessageManager, Message, SlashCommandBuilder, TextChannel } from 'discord.js';
 import { token, channelId } from './config.json';
+// If you are wondering why its called banana, you can thank js/ts for lacking namespaces
+// and overriding my import of "constants" when I try to import my own file named "constants".
+import { DISCORD_LINK_REGEX, FILE_TO_WRITE_TO } from './banana';
 import fs = require('fs');
-
-
-const DISCORD_LINK_REGEX = /(https:\/\/cdn\.discordapp\.com\/attachments\/\d+)|(https:\/\/media\.discordapp\.net\/attachments\/\d+)/g;
-const FILE_TO_WRITE_TO = './links.txt';
 
 
 function appendToFile(data: string) {
