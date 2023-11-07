@@ -1,4 +1,4 @@
-import { Client, Events, GatewayIntentBits, GuildMessageManager, Message, SlashCommandBuilder, TextChannel } from 'discord.js';
+import { Client, Events, GatewayIntentBits, GuildMessageManager, TextChannel } from 'discord.js';
 import { token, channelId } from './config.json';
 // If you are wondering why its called banana, you can thank js/ts for lacking namespaces
 // and overriding my import of "constants" when I try to import my own file named "constants".
@@ -8,7 +8,7 @@ import fs = require('fs');
 
 function appendToFile(data: string) {
 	if (!fs.existsSync(FILE_TO_WRITE_TO)) {
-		console.log("WARNING! FILE DOES NOT EXIST, CREATING NEW FILE...");
+		console.log('WARNING! FILE DOES NOT EXIST, CREATING NEW FILE...');
 	}
 	fs.appendFileSync(FILE_TO_WRITE_TO, data);
 }
@@ -29,26 +29,26 @@ client.once(Events.ClientReady, async c => {
 	const textContentUrls = [];
 	const attachmentUrls = [];
 	const textContentOfMessages = [];
-	
+
 	// Default is 50 messages retrieved btw.
 	let messages = await messageManager.fetch({ limit: 100 });
 	while (messages.size > 0) {
-		let message = messages.first();
+		const message = messages.first();
 		if (!messages.delete(message.id)) {
-			throw new Error("Attempted to Delete non-existant message from messages queue.");
+			throw new Error('Attempted to Delete non-existant message from messages queue.');
 		}
 
-		let messageContent = message.content;
-		let messageAttachment = message.attachments;
+		const messageContent = message.content;
+		const messageAttachment = message.attachments;
 
 		textContentOfMessages.push(messageContent);
 
-		for (let entry of messageAttachment) {
-			let attachment = entry[1];
-			let attachmentUrl = attachment.url;
+		for (const entry of messageAttachment) {
+			const attachment = entry[1];
+			const attachmentUrl = attachment.url;
 			attachmentUrls.push(attachmentUrl);
 		}
-		
+
 		if (messageContent.match(DISCORD_LINK_REGEX)) {
 			textContentUrls.push(messageContent);
 		}
@@ -61,26 +61,26 @@ client.once(Events.ClientReady, async c => {
 		}
 	}
 
-	appendToFile("\nArchive of Messages Content:\n");
+	appendToFile('\nArchive of Messages Content:\n');
 	appendToFile(textContentOfMessages.join('\n'));
-	appendToFile("\nAttachment Urls:\n");
+	appendToFile('\nAttachment Urls:\n');
 	appendToFile(attachmentUrls.join('\n'));
-	appendToFile("\nURLs In Text Content:\n");
+	appendToFile('\nURLs In Text Content:\n');
 	appendToFile(textContentUrls.join('\n'));
 
-	console.log("Collecting completed.");
+	console.log('Collecting completed.');
 });
 
 // TODO make the channel selectable at runtime! :)
-const logChannel = new SlashCommandBuilder()
-	.setName('log')
-	.setDescription('logs messages in a specific channel')
-	.addChannelOption(option => {
-		return option
-			.setName('channel')
-			.setDescription('The channel to collect the links from.')
-			.setRequired(true);
-	});
+// const logChannel = new SlashCommandBuilder()
+// 	.setName('log')
+// 	.setDescription('logs messages in a specific channel')
+// 	.addChannelOption(option => {
+// 		return option
+// 			.setName('channel')
+// 			.setDescription('The channel to collect the links from.')
+// 			.setRequired(true);
+// 	});
 
 // Log in to Discord with your client's token
 client.login(token);
