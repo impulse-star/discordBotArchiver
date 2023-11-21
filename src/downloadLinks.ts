@@ -3,11 +3,16 @@ import { DISCORD_LINK_REGEX } from './banana';
 
 console.log('Download script.');
 
-const fileString = fs.readFileSync('../links.txt', 'utf8');
+const fileString = fs.readFileSync('./links.txt', 'utf8');
 
 interface Attachment {
 	url: string;
 	filename: string;
+}
+
+if (!fs.existsSync('./downloads')) {
+	console.log('No download directory present, creating one...');
+	fs.mkdirSync('./downloads');
 }
 
 let totalFilesDownloaded = 0;
