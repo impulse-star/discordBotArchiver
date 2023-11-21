@@ -1,5 +1,6 @@
 import fs = require('fs');
-import { DISCORD_LINK_REGEX } from './banana';
+import { DISCORD_LINK_REGEX, GetRandomInt } from './banana';
+import { GetSha256Hash } from './banana';
 
 console.log('Download script.');
 
@@ -17,6 +18,7 @@ if (!fs.existsSync('./downloads')) {
 
 let totalFilesDownloaded = 0;
 let totalTextUrlsDownloaded = 0;
+let totalDuplicates = 0;
 let startLogging = false;
 let startUrlLogging = false;
 const downloadQueue: Attachment[] = [];
@@ -33,7 +35,7 @@ for (const line of fileString.split('\n')) {
 		if (startUrlLogging) {
 			const url = line.replace('https://media.discordapp.net/attachments/',
 				'https://cdn.discordapp.com/attachments/').split('?')[0];
-			const filename = fileString.split('/')[6].split('?')[0];
+			const filename = url.split('/')[6];
 			textUrlDownloadQueue.push({ url, filename });
 			totalTextUrlsDownloaded++;
 			continue;
@@ -44,23 +46,31 @@ for (const line of fileString.split('\n')) {
 		}
 		const url = line.replace('https://media.discordapp.net/attachments/',
 			'https://cdn.discordapp.com/attachments/').split('?')[0];
-		const filename = fileString.split('/')[6].split('?')[0];
+		const filename = url.split('/')[6];
 		downloadQueue.push({ url, filename });
 		totalFilesDownloaded++;
 	}
 }
 
-console.log(`Found ${totalFilesDownloaded}` +
+console.log(`Found ${totalFilesDownloaded} ` +
 	`attachment files and ${totalTextUrlsDownloaded} urls sent as links in messages`);
 
 console.log('Downloading Urls');
 
-async function downloadFile({ url, filename }: Attachment, interval: NodeJS.Timeout, listOfUrls: Attachment[]) {
+const alreadyDownloadedImages: Set<string> = new Set();
+
+async function downloadFile(interval: NodeJS.Timeout, listOfUrls: Attachment[]) {
+	if (listOfUrls.length <= 0) {
+		console.log('Finished downloading a List of Url\'s');
+		console.log(`Total duplicates found = ${totalDuplicates}`);
+		clearInterval(interval);
+		return;
+	}
+	const { url, filename } = listOfUrls.pop();
+	console.log(`Downloading url: ${url} with filename: ${filename}`);
 	if (!url.match(DISCORD_LINK_REGEX)) {
 		console.error(`Attempted to download invalid url: ${url}`);
-	}
-	if (listOfUrls.length <= 0) {
-		clearInterval(interval);
+		return;
 	}
 	else {
 		const response = await fetch(url);
@@ -69,12 +79,28 @@ async function downloadFile({ url, filename }: Attachment, interval: NodeJS.Time
 			return;
 		}
 		const imageData = Buffer.from(await response.arrayBuffer());
-		fs.writeFileSync(`./downloads/${filename}`, imageData);
+		const imageHash = GetSha256Hash(imageData);
+		if (alreadyDownloadedImages.has(imageHash)) {
+			console.log(`Already have downloaded file: ${filename}` +
+				`from url: ${url} (Matching Hash: ${imageHash})`);
+			totalDuplicates++;
+		}
+		else {
+			alreadyDownloadedImages.add(imageHash);
+			const originalFilename = `./downloads/${filename}`;
+			let randomFileName = originalFilename;
+			while (fs.existsSync(randomFileName)) {
+				randomFileName = `./downloads/${GetRandomInt(1000000)}_${filename}`;
+			}
+			fs.writeFileSync(randomFileName, imageData);
+		}
 	}
 }
 
-const intervalOne = setInterval(() => { downloadFile(downloadQueue.pop(), intervalOne, downloadQueue); });
-const intervalTwo = setInterval(() => { downloadFile(textUrlDownloadQueue.pop(), intervalTwo, textUrlDownloadQueue); });
+const allUrlsPossibly = downloadQueue.concat(textUrlDownloadQueue);
 
-console.log('Program Completed.');
+const intervalOne = setInterval(() => { downloadFile(intervalOne, allUrlsPossibly); }, 5000);
+// const intervalTwo = setInterval(() => { downloadFile(intervalTwo, textUrlDownloadQueue); }, 5000);
+
+console.log('Download Loops began.');
 
