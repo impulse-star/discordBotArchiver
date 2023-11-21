@@ -63,6 +63,10 @@ async function downloadFile(interval: NodeJS.Timeout, listOfUrls: Attachment[]) 
 	if (listOfUrls.length <= 0) {
 		console.log('Finished downloading a List of Url\'s');
 		console.log(`Total duplicates found = ${totalDuplicates}`);
+		console.log(`Total files from attachments: ${totalFilesDownloaded}`);
+		console.log(`Total files from hyperlinks in text: ${totalTextUrlsDownloaded}`);
+		console.warn('Please make sure to verify that all images have been downloaded by using' +
+			'discord\'s built in search tool!');
 		clearInterval(interval);
 		return;
 	}
