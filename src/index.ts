@@ -5,10 +5,18 @@ import { token, channelId } from './config.json';
 import { DISCORD_LINK_REGEX, FILE_TO_WRITE_TO } from './banana';
 import fs = require('fs');
 
+// my code doesnt deal with repeated writes to the file, so we wipe the file everytime on start
+if (fs.existsSync(FILE_TO_WRITE_TO)) {
+	console.warn('Warning, links.txt already exists.');
+	console.warn('Since the program has no built in checks for a links.txt thats been written to ' +
+		'multiple times, the program will delete this file. Expect this behaviour to change in ' +
+		'the future.');
+	fs.rmSync(FILE_TO_WRITE_TO);
+}
 
 function appendToFile(data: string) {
 	if (!fs.existsSync(FILE_TO_WRITE_TO)) {
-		console.log('WARNING! FILE DOES NOT EXIST, CREATING NEW FILE...');
+		console.log('file does not exist, creating new file...');
 	}
 	fs.appendFileSync(FILE_TO_WRITE_TO, data);
 }
@@ -69,6 +77,8 @@ client.once(Events.ClientReady, async c => {
 	appendToFile(textContentUrls.join('\n'));
 
 	console.log('Collecting completed.');
+	// We have succeeded in collecting links.
+	process.exit(0);
 });
 
 // TODO make the channel selectable at runtime! :)

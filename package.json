@@ -7,8 +7,9 @@
     "typescript": "^5.2.2"
   },
   "scripts": {
-    "start": "npx tsc; nodemon ./build/index.js",
-    "downloadLinks": "npx tsc; node ./build/downloadLinks.js"
+    "start": "npx tsc; npm run collectLinks; npm run downloadLinks",
+    "downloadLinks": "npx tsc; node ./build/downloadLinks.js",
+    "collectLinks": "npx tsc; node ./build/index.js"
   },
   "dependencies": {
     "discord.js": "^14.12.1"
